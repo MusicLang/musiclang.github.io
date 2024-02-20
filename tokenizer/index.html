@@ -30,9 +30,9 @@
                 <h2 id="introduction">Introduction</h2>
                 <p>
                     The tokenization for symbolic music generation has been the subject of many investigation.
-                    Prior research has predominantly concentrated on optimizing a loss function related to next token prediction.
-                    Our research, however, focus on the controllability of the output sequence, a critical aspect for its application in music composition assistance.
-                    This facet of controllability has been less frequently addressed, possibly due to the challenge of quantifying a universal metric for controllability performance.
+                    Prior research has predominantly concentrated on optimizing loss functions related to the next token prediction problem.
+                    Our research, however, focuses on the controllability of the output sequence, a critical aspect for its application in music composition assistance.
+                    This facet of controllability has been less frequently addressed, possibly due to the challenge of quantifying an universal metric for controllability performance.
                     In our novel tokenization scheme, we employ an in-depth analysis of the musical score to distill pertinent musical information, which is then encoded within the tokenization process.
                     Such comprehensive analysis enhances the capacity to finely tune the outputs of music language models trained using this approach.
                     Furthermore, we introduce a controlled generation framework designed to forecast music incorporating these control constraints.
@@ -45,15 +45,15 @@
                     <p>Figure 1: Horizontal VS Vertical parsing</p>
                 </div>
                 <p>
-                    When representing music with tokens, various strategies can be employed to parse the score, each presenting distinct advantages and disadvantages.
+                    When representing music with tokens, various parsing strategies can be employed, each presenting distinct advantages and disadvantages.
                     A primary challenge is the simultaneous occurrence of musical events.
                     Deciding the sequence in which to parse these events introduces a fundamental dilemma, a trade-off between melody or harmony representation.
                     Below, we offer a comparison of these methods:
                 </p>
                 <ol>
-                    <li>Parse the music vertically, meaning notes are fully ordered timewise. It favours harmonically rich generation.</li>
-                    <li>Parse the music horizontally, meaning notes are grouped by voice. It favours melodic generation.</li>
-                    <li>Combine both methods: For instance, order notes by time within each measure, but overall, arrange them by musical part. There are many ways to do this.
+                    <li><b>Parse the music vertically</b>, meaning notes are fully ordered timewise. It favours harmonically rich generation.</li>
+                    <li><b>Parse the music horizontally</b>, meaning notes are grouped by voice. It favours melodic generation.</li>
+                    <li><b>Combine both methods</b>: For instance, order notes by time within each measure, but overall, arrange them by musical part. There are many ways to do this.
                     </li>
                 </ol>
                 <p>Most tools designed for creating long music sequences opt for a mixed method. This reflects the way musicians typically read music:</p>
@@ -100,7 +100,7 @@
                     <li><b>Tonality root</b>: 0 to 12, corresponding to each pitch class possible (C to B).</li>
                     <li><b>Tonality mode</b>: m for harmonic minor, M for major.</li>
                     <li><b>Chord octave</b>: -4 to 4, indicating the root note's octave relative to the 4th octave.</li>
-                    <li><b>Extension</b>: Uses figured bass notation to detail the chord's bass and any extensions (e.g., '', 6, 64, 7, 65, 43, 2), including variations with sus2 or sus4 for suspended chords.</li>
+                    <li><b>Extension</b>: Uses figured bass notation to detail the chord's bass and any extensions (e.g., '' (triad in root position), '6', '64', '7', '65', '43', '2'), including variations with sus2 or sus4 for suspended chords.</li>
                     <li><b>Duration numerator/denominator</b>: Numerical values representing the chord's fractional duration, providing control over the time signature (since one chord equals one bar in MusicLang).</li>
                 </ul>
 

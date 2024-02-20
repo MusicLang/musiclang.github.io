@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta name="generator" content="Hugo 0.16-DEV" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+<link rel="stylesheet" href="../css/normalize.css">
+<link rel="stylesheet" href="../css/skeleton.css">
+<link rel="stylesheet" href="../css/custom.css">
+<link rel="alternate" href="index.xml" type="application/rss+xml" title="Muzic">
+<link rel="shortcut icon" href="favicon.png" type="image/x-icon" />
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<title>Annotate chords and scales progression of MIDIs using MusicLang analysis</title>
+</head>
+<body>
+
+<div class="container">
+	<header role="banner">
+	</header>
+	<main role="main">
+		<article itemscope itemtype="https://schema.org/BlogPosting">
+            <h1 class="entry-title" itemprop="headline">Annotate chords and scales progression of MIDIs using MusicLang analysis</h1>
+			<section itemprop="entry-text">
+                <h2 id="abstract">Abstract</h2>
+                <p>Controlling the harmonic progression, which includes the chords and scales of a song,
+                    is an important ability in music generation tasks.
+                    The chords and the scales play a crucial role in defining a song's structure and emotional impact.
+                    In this article, we introduce a fast method for annotating the chord and scale progressions of MIDI files using our analysis package.
+                    We then show some use cases of this chord inference algorithm.
+                    All the code required to run the examples is available on <a href="https://github.com/musiclang/musiclang">GitHub</a>.
+                </p>
+                <h2 id="introduction">Introduction : The chord scale notation</h2>
+                <p>
+                    Discussing chord progressions often involves talking about the chords and the current scale. For instance, in the key of C major, the chords are C, Dm, Em, F, G, Am, Bdim.
+                    A simple progression like <i>C Am Dm G</i> can be represented as <i>I vi ii V</i> in the key of C major.
+                    The key points here include :
+                </p>
+                <ul>
+                    <li>the chord degree (I, II, III, IV, V, VI, VII) </li>
+                    <li>the scale's root note (C)</li>
+                    <li>the mode (major)</li>
+                </ul>
+                <p>
+                    Additionally, one might consider:
+                </p>
+                <ul>
+                    <li>The chord inversion (examples include C/E, C/G, Dm/F, G/B, or as notated in <a href="https://en.wikipedia.org/wiki/Figured_bass">figured bass roman numeral notation</a> as I6, I64, ii6, V6)</li>
+                    <li>The chord extensions (such as C7, Dm(sus4), G13)</li>
+                </ul>
+
+                <div style="text-align:center"><img src="../images/chord_parsing/figured_bass.png" width=1000 height=1000>
+                    <p><i>Figure 1: Figured bass notation with roman numeral analysis</i></p>
+                </div>
+
+                <p>
+                    Automatically identifying a song's chord and scale progression would be extremely beneficial. However, this task is challenging due to several factors:
+
+                </p>
+
+                <ul>
+                    <li>Chords can vary in duration, requiring identification of potential chord changes.</li>
+                    <li>A single chord can correspond to multiple scales.</li>
+                    <li>It's necessary to distinguish between passing melody notes and chord notes in a way that mimics human perception of harmony.</li>
+                </ul>
+
+                <div style="text-align:center"><img src="../images/chord_parsing/process.png" width=1000 height=1000>
+                    <p><i>Figure 2: What we want to achieve, labelling chord scale progression. But there are some difficulties, how to detect
+                    if a note is a chord note, and how to detect the chords starts on the first beat of each bar here ?</i>
+                    </p>
+                </div>
+
+                <p> We propose some simplifications to tackle these challenges: </p>
+
+                <ul>
+                    <li>Assume one chord per bar to simplify chord change detection.
+                        This approximation is useful, even though some bars may contain more than one chord, by highlighting the primary chord.
+                    </li>
+                    <li>Focus on two modes to limit the number of potential scales for each chord degree: major (in C: C D E F G A B) and harmonic minor (in C: C D Eb F G Ab B). These are the most commonly used modes in figured bass notation.
+                    </li>
+                    <li>Restrict the scale degrees to the first seven without alterations, diverging slightly from traditional roman numeral analysis.
+                        This restriction significantly reduces the potential scale options for each chord.
+                        For example, in C minor, the bVII (Bb major) would typically be considered, but here, it would be treated as the V of the relative major scale, Eb major.
+                    </li>
+                </ul>
+
+
+                <h2 id="chord_scale_detection">Chord scale detection</h2>
+
+
+                <h3 id="proposed-algorithm">Proposed algorithm</h3>
+
+
+                <div style="text-align:center"><img src="../images/chord_parsing/algo.png" width=1000 height=1000>
+                    <p><i>Figure 3: Proposed algorithm</i></p>
+                </div>
+
+                <p>
+                    We suggest a straightforward algorithm to identify a song's chord scale progression. The algorithm operates through these steps:
+                </p>
+                <ol>
+                    <li><b>Extract the chroma vectors for each bar:</b> Instead of inputting raw notes into the algorithm, we extract the distribution of the notes (The number of C, Db, D, Eb, E, F, ... divided by the total number of notes) for each bar. This results in a 12-dimensional vector. Of course, we remove the drums beforehand.</li>
+
+                    <li><b>Query the most probable chord scale:</b>
+                        With the chroma distribution of all bars in hand, we aim to identify the potential candidates for each bar,
+                        independent of the others. This is done by calculating the maximum correlation with a template database.
+                        Each chord (including root position extensions) and scale degree is linked to a chroma vector,
+                        which highlights the notes of the chord and scale to varying extents.
+                        Additionally, we apply a prior to each chord scale to assess its likelihood of appearing in a song.
+                        We then identify the chord scales with the highest correlation for each bar, adjusted by the prior.
+                        This process may yield one or more candidates depending on the chroma vector.
+                        For instance, if the chroma vector closely matches that of a C major in a C major scale,
+                        it might also be close to the chroma vector of C major in an F major scale,
+                        even equal if the bar lacks B or B flat notes. This method provides a solid estimate of the chord scale candidates.</li>
+
+                    <li><b>Extract maximum probability sequence:</b> After identifying a list of candidate chord scales for each bar,
+                        our goal is to determine the most probable sequence of these chord scales.
+                        This is achieved by redefining our task as a Sequence Alignment or Edit Distance problem,
+                        which we solve using a straightforward dynamic programming algorithm.
+                        The key aspect we aim to minimize is the number of modulations,
+                        or scale changes, as naturally, sequences with fewer modulations,
+                        such as I/C major to ii/C major, are considered more probable than those like I/C major to i/D minor.
+                        We introduce a nuance in our edit distance calculation by not treating a change to a relative major
+                        or minor as a modulation, given their shared notes and common usage within the same piece.
+                        This approach allows us to formulate a clear problem that can be efficiently solved through dynamic programming,
+                        ultimately yielding a sequence of chord scales that minimizes modulations while aligning closely with chord scale templates.</li>
+                    <li><b>Find the inversion (the bass):</b> Our analysis includes determining the bass note of each chord.
+                        To do this, we employ a simple algorithm that identifies the lowest note within the bar that is part of
+                         the chord and labels the chord's inversion based on this note.
+                        For example, if the lowest note is a G in a C major chord,
+                        the chord is labeled as C64 (second inversion).</li>
+                </ol>
+
+                <h3 id="improvements">Possible improvements</h3>
+                <p>
+                    The proposed algorithm is fast and useful for many use cases. However, there are several possible improvements:
+                </p>
+                <ul>
+                    <li><b>Finetune the chord scale templates:</b> The construction of the template chroma vector and the priors for each chord scale currently follow simple rules. A machine learning algorithm could be employed to refine these templates and priors using annotated examples.</li>
+                    <li><b>Improve the inversion detection:</b> The algorithm may not always identify the lowest note as the actual bass note of a chord, as it could be a passing tone or part of an alternating bass pattern (a common example is alternating between the root note and the fifth below). A machine learning algorithm, enhanced with time information added to the chroma vector, could improve bass note detection using annotated examples.</li>
+                    <li><b>Improve vocabulary:</b> Currently, the algorithm only considers triads and seventh chords built on the major and harmonic minor scales, along with sus2 and sus4 chords. Expanding the vocabulary to include more complex chords (e.g., ninth chords) and additional modes could offer more comprehensive analysis, though finding suitable templates for each new chord scale would be challenging.</li>
+                    <li><b>Detect chord changes:</b> While the current approach assigns one chord scale per bar, it could be improved to detect chord changes at any point in the score. The Augmented Net, an open-source tool available <a href="https://github.com/napulen/AugmentedNet">here</a>, addresses this challenge. Ultimately, the choice of algorithm depends on the specific use case; our algorithm offers robust and fast analysis, albeit with a limitation to one chord per bar.</li>
+                </ul>
+
+
+                <h2 id="examples">Some code examples</h2>
+                <p> All example comes can be run with our package available <a href="https://github.com/musiclang/musiclang">here.</a> </p>
+                <h3 id="install">Some basic usage of the package :</h3>
+
+<pre><code class="python">from musiclang import Score
+
+score = Score.from_midi('data/bach_847.mid')
+chords = score.to_romantext_chord_list()
+print(chords)</code></pre>
+                <p>Output :<label>('c', ['i', 'i64/iv', 'iv64', 'i', 'IV6/III', 'vii%64/V', 'i6/v', 'vii%64/IV', 'i6/iv',
+                    'vii%64/III', 'I6/III', 'i', 'vii%/III', 'I/III', 'vii%64/VII', 'ii%', 'ii%2', 'vi2/III', 'VI', 'ii%/v', 'i64', 'i64', 'i64', 'i64', 'V7', 'i64', 'iv64/v', 'I/V', 'I/V', 'V2', 'i6', 'vii%/VII', 'viio6', 'ii64/III', 'viio', 'vii%/III', 'I/I', 'iv64', 'i64(sus2)', 'iv', 'iv/v', 'viio7/v', 'vi/III', 'V43', 'i64(sus4)', 'ii%6', 'i64', 'V43/III', 'I/III', 'vii%/III', 'vi/III', 'V65/III', 'ii%7/v', 'i6/v', 'vii%65/IV',
+                    'iv64/v', 'V65/VII', 'ii%7', 'ii%2/iii', 'ii/III', 'I/III', 'vii%7/III', 'i64', 'i64(sus4)', 'i64', 'VI64', 'i', 'ii%7', 'I64/I'])</label></p>
+
+                <p> Here we have our chord progression, bar per bar of our midi file presented in the standard roman numeral notation.
+                If you don't care about the scale you can also display the chords in the standard notation :</p>
+
+<pre><code class="python">from musiclang import Score
+
+score = Score.from_midi('data/bach_847.mid') # Your midi file here
+chords = score.to_chord_repr()
+print(chords)</code></pre>
+                <p>Output :<label>Cm Fm/C Fm/C Cm AbM/C F#dim/C Gm/Bb Edim/Bb Fm/Ab Ddim/Ab EbM/G Cm Ddim
+                    EbM Adim/Eb Ddim Dm7b5/C Cm7/Bb AbM Adim Cm/G Cm/G Cm/G Cm/G G7 Cm/G Cm/G GM GM G7/F Cm/Eb Adim Bdim/D Fm/C
+                    Bdim Ddim CM Fm/C Csus2/G Fm Cm F#o Cm G7/D Csus4/G Ddim/F Cm/G Bb7/F EbM Ddim
+                    Cm Bb7/D Am7b5 Gm/Bb Em7b5/G Cm/G F7/A Dm7b5 Fm7b5/Eb Fm EbM Dm7b5 Cm/G Csus4/G Cm/G AbM/Eb Cm Dm7b5 CM/G</label></p>
+                <p> The chord progression is displayed on its simplest form : a sequence of chords. With musiclang you can convert it back to
+                a chord/scale progression reusing the decoding algorithm we talked about earlier. </p>
+
+<pre><code class="python">from musiclang import Score
+chords_string ="DM A7 A7/C# GM"
+chords_score = Score.from_chord_repr(chords_string)
+chords = chords_score.to_romantext_chord_list()
+print(chords)</code></pre>
+                <p>Output :<label>('D', ['I', 'V7', 'V65', 'IV'])</label></p>
+
+                <h2>A bonus use case: Project a pattern onto a new chord progression</h2>
+                <p>By parsing chord progressions in MusicLang, we're able to extract musical patterns that are independent of a song's specific chord progression.
+    The example below demonstrates this capability by loading any MIDI file, extracting a pattern from the first bar, and applying it to a chosen chord progression. Additionally, we incorporate some counterpoint optimization to enhance the musicality of the example:</p>
+
+<pre><code class="python">from musiclang import Score
+    from musiclang.library import *
+from musiclang import Score
+
+your_score = Score.from_midi("path_to_midi_file.mid")
+
+# Chord projection on which we are gonna project our pattern
+chords_string ="DM A7/C# GM/B A7 DM Cm Gm/Bb BbM DM/A AM DM"
+chords_score = Score.from_chord_repr(chords_string)
+
+# Assign duration to chords (here one chord will last 4 quarters)
+chord_progression = chords_score.set_duration(4)
+
+# Extract a pattern from the bach score
+pattern = your_score[0].to_pattern(drop_drums=False)
+
+score = Score.from_pattern(pattern, chord_progression)
+score.to_midi('projection.mid')
+score_arranged_with_counterpoint =score.get_counterpoint([score.get_bass_instrument()])
+score_arranged_with_counterpoint.to_midi('projection_counterpoint.mid')
+
+</code></pre>
+                <p>Let's here the original patterns and their variations on a given new chord progression : </p>
+                <table width="100%" border="1">
+                    <tr>
+                        <th width="40%" style="text-align: left" scope="col">Chord progression</th>
+                        <th width="20%" style="text-align: left" scope="col">Original</th>
+                        <th width="20%" style="text-align: left" scope="col">Projection</th>
+                        <th width="20%" style="text-align: left" scope="col">Projection with counterpoint</th>
+                    </tr>
+                    <tr>
+                        <td width="40%" style="text-align: left">
+                            DM A7/C# GM/B A7 DM Cm Gm/Bb BbM DM/A AM DM
+                        </td>
+                        <td width="20%" style="text-align: left">
+                            <audio controls="controls">
+                                <source src="../audio/chord_parsing/original.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                        <td width="20%" style="text-align: left">
+                            <audio controls="controls">
+                                <source src="../audio/chord_parsing/projection.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                        <td width="20%" style="text-align: left">
+                            <audio controls="controls">
+                                <source src="../audio/chord_parsing/projection_counterpoint.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="40%" style="text-align: left">
+                            Dm FM Dm/F Gm Dm/F FM Gm A7
+                        </td>
+                        <td width="20%" style="text-align: left">
+                            <audio controls="controls">
+                                <source src="../audio/chord_parsing/eminem_original.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                        <td width="20%" style="text-align: left">
+                            <audio controls="controls">
+                                <source src="../audio/chord_parsing/eminem_projection.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                        <td width="20%" style="text-align: left">
+                            <audio controls="controls">
+                                <source src="../audio/chord_parsing/eminem_projection_counterpoint.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                    </tr>
+                </table>
+
+                <h2 id="conclusion">Conclusion & Next steps</h2>
+                <p>
+                    We've delved into a straightforward algorithm for identifying a song's chord scale progression and discussed its application using the MusicLang package.
+                    This approach unlocks many opportunities, such as extracting patterns from a song and projecting them onto a new chord progression.
+                    Moreover, it provides the means to create a chord progression generative model or a full music generator that can control the harmonic progression.
+                    In subsequent articles, we will explore the development of a tokenizer and a language model that build upon this.
+                </p>
+			</section>
+		</article>
+	</main>
+</div>
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-139981676-1', 'auto');
+	ga('send', 'pageview');
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/x-mathjax-config">
+     MathJax.Hub.Config({
+         HTML: ["input/TeX","output/HTML-CSS"],
+         TeX: {
+                Macros: {
+                         bm: ["\\boldsymbol{#1}", 1],
+                         argmax: ["\\mathop{\\rm arg\\,max}\\limits"],
+                         argmin: ["\\mathop{\\rm arg\\,min}\\limits"]},
+                extensions: ["AMSmath.js","AMSsymbols.js"],
+                equationNumbers: { autoNumber: "AMS" } },
+         extensions: ["tex2jax.js"],
+         jax: ["input/TeX","output/HTML-CSS"],
+         tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                    displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+                    processEscapes: true },
+         "HTML-CSS": { availableFonts: ["TeX"],
+                       linebreaks: { automatic: true } }
+     });
+ </script>
+
+ <script type="text/x-mathjax-config">
+     MathJax.Hub.Config({
+       tex2jax: {
+         skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+       }
+     });
+ </script>
+
+ <script type="text/javascript" async
+   src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+ </script>
+
+
+
+
+</body>
+</html>
