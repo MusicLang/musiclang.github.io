@@ -37,9 +37,16 @@ href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.
                     </ul>
                 </p>
                 <p>Rather than a long speech, this blog post provides concrete examples of realizations made with MusicLang. All the following examples can be easily be reprocuded in our colab <a href="https://colab.research.google.com/drive/1MA2mek826c05BjbWk2nRkVv2rW7kIU_S?usp=sharing">here.</a> Have fun!</p>
+                <p>3 sections: 
+                    <ul>
+                        <p>1. <a href="#free-gen">Free Generations</a>;</p>
+                        <p>2. <a href="#free_continuation">Free continuation from an existing sound</a>;</p>
+                        <p>3. <a href="#controlled_continuation">Controlled continuation from an existing sound</a>.</p>
+                    </ul>
+                </p>
             </section>
             <section>
-                <h2 id="free-gen">Free generation examples</h2>
+                <h2 id="free-gen">1. Free generation examples</h2>
                 <p>Those generations has been done without any constraints to the model:</p>
             </section>
             <section id="examples">
@@ -354,11 +361,177 @@ href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.
                 </table>
             </section>
             <section>
-                <h2 id="extension">Extending an existing track</h2>
+                <h2 id="free_continuation">Free continuation of an existing music from a template</h2>
                     <p>With MusicLang, you can use your an existing music as a template to create new composition. In the following examples, we'll extend an existing music and control the the chord progression of the generated music:</p>
             </section>
             <section id="examples">
-                <h3>Classic</h3>
+                <section id="examples">
+                    <h3>Bach</h3>
+                        <table width="100%" border="1">
+                            <tr>
+                                <th width="Z0%" style="text-align: center" scope="col">Title</th>
+                                <th width="80%" style="text-align: center" scope="col">Extented with MusicLang</th>
+                            </tr>
+                            <tr>
+                                <td width="20%" style="text-align: center">Prelude and fugue in C minor #1</td>
+                                <td width="80%" style="text-align: center">
+                                    <audio controls="controls">
+                                        <source src="../audio/from_templates/bach/bach_1.mp3" autoplay="">Your browser does not support the audio element.
+                                    </audio>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="20%" style="text-align: center">Prelude and fugue in C major #2</td>
+                                <td width="80%" style="text-align: center">
+                                    <audio controls="controls">
+                                        <source src="../audio/from_templates/bach/bach_2.mp3" autoplay="">Your browser does not support the audio element.
+                                    </audio>
+                                </td>
+                            </tr>
+                        </table>
+                </section>
+                <h3>Beethoven</h3>
+                <table width="100%" border="1">
+                    <tr>
+                        <th width="Z0%" style="text-align: center" scope="col">Title</th>
+                        <th width="80%" style="text-align: center" scope="col">Extented with MusicLang</th>
+                    </tr>
+                    <tr>
+                        <td width="20%" style="text-align: center">Für Elise variation #1</td>
+                        <td width="80%" style="text-align: center">
+                            <audio controls="controls">
+                                <source src="../audio/from_templates/beethoven/generated_beethoven_fur_elise_1.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="20%" style="text-align: center">Für Elise variation #2</td>
+                        <td width="80%" style="text-align: center">
+                            <audio controls="controls">
+                                <source src="../audio/from_templates/beethoven/generated_beethoven_fur_elise_39.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="20%" style="text-align: center">Für Elise variation #3</td>
+                        <td width="80%" style="text-align: center">
+                            <audio controls="controls">
+                                <source src="../audio/from_templates/beethoven/generated_beethoven_fur_elise_65.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                    </tr>
+                </table>
+            </section>
+            <section id="examples">
+                <h3>Mozart</h3>
+                <table width="100%" border="1">
+                    <tr>
+                        <th width="Z0%" style="text-align: center" scope="col">Title</th>
+                        <th width="80%" style="text-align: center" scope="col">Extented with MusicLang</th>
+                    </tr>
+                    <tr>
+                        <td width="20%" style="text-align: center">Piano sonata no 11 #1</td>
+                        <td width="80%" style="text-align: center">
+                            <audio controls="controls">
+                                <source src="../audio/from_templates/mozart/generated_mozart_14.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="20%" style="text-align: center">Piano sonata no 11 #2</td>
+                        <td width="80%" style="text-align: center">
+                            <audio controls="controls">
+                                <source src="../audio/from_templates/mozart/generated_mozart_16.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="20%" style="text-align: center">Piano sonata no 11 #3</td>
+                        <td width="80%" style="text-align: center">
+                            <audio controls="controls">
+                                <source src="../audio/from_templates/mozart/generated_mozart_2.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="20%" style="text-align: center">Piano sonata no 11 #4</td>
+                        <td width="80%" style="text-align: center">
+                            <audio controls="controls">
+                                <source src="../audio/from_templates/mozart/generated_mozart_63.mp3" autoplay="">Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                    </tr>
+                </table>
+            </section>
+            <section id="examples">
+                <h3>Final Fantasy VII</h3>
+                    <table width="100%" border="1">
+                        <tr>
+                            <th width="Z0%" style="text-align: center" scope="col">Title</th>
+                            <th width="80%" style="text-align: center" scope="col">Extented with MusicLang</th>
+                        </tr>
+                        <tr>
+                            <td width="20%" style="text-align: center">FF7 #1</td>
+                            <td width="80%" style="text-align: center">
+                                <audio controls="controls">
+                                    <source src="../audio/from_templates/ff7/generated_ff7world_10.mp3" autoplay="">Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" style="text-align: center">FF7 #2</td>
+                            <td width="80%" style="text-align: center">
+                                <audio controls="controls">
+                                    <source src="../audio/from_templates/ff7/generated_ff7world_67.mp3" autoplay="">Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" style="text-align: center">FF7 #3</td>
+                            <td width="80%" style="text-align: center">
+                                <audio controls="controls">
+                                    <source src="../audio/from_templates/ff7/generated_ff7world_70.mp3" autoplay="">Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                        </tr>
+                    </table>
+                    <h3>Rayman</h3>
+                    <table width="100%" border="1">
+                        <tr>
+                            <th width="Z0%" style="text-align: center" scope="col">Title</th>
+                            <th width="80%" style="text-align: center" scope="col">Extented with MusicLang</th>
+                        </tr>
+                        <tr>
+                            <td width="20%" style="text-align: center">Rayman #1</td>
+                            <td width="80%" style="text-align: center">
+                                <audio controls="controls">
+                                    <source src="../audio/from_templates/rayman/generated_rayman-bandland_52.mp3" autoplay="">Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" style="text-align: center">Rayman #2</td>
+                            <td width="80%" style="text-align: center">
+                                <audio controls="controls">
+                                    <source src="../audio/from_templates/rayman/generated_rayman-bandland_57.mp3" autoplay="">Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" style="text-align: center">Rayman #3</td>
+                            <td width="80%" style="text-align: center">
+                                <audio controls="controls">
+                                    <source src="../audio/from_templates/rayman/generated_rayman-bandland_61.mp3" autoplay="">Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                        </tr>
+                    </table>
+            </section>
+
+
+
+            <section id="examples">
+                <h2 id="controlled_continuation">Controlled continuation of an existing music from a template</h2>
                     <table width="100%" border="1">
                         <tr>
                             <th width="40%" style="text-align: center" scope="col">Title</th>
